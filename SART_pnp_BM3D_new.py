@@ -317,7 +317,7 @@ for n in range(len(fnames)):
                 alpha *= gamma #Multiplying by a decaying factor, starts at 1
             print("alpha: " + str(alpha) + '\n')
             #Apply alpha if necessary
-            if pnorm > alpha: #If norm of the two images, how far apart they are is greater than Computed attenuation factor for superiorization, not an arg
+            if pnorm > alpha: #If norm of the two images, how far apart they are is greater than the computed attenuation factor for superiorization, not an arg. 
                 p = alpha * p / (np.linalg.norm(p,'fro') + eps) #Denominator probably doesn't need to be recalculated here, as it's stored in 'pnorm'. Not changing it now, as I'd prefer not to break it by accident.
                 f = f + p #Add that difference to the function
             else:
