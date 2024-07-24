@@ -331,20 +331,20 @@ for n in range(len(fnames)):
         #——————————————————————————————————————————————————————————————————————#
         # SART loop                                                            #
         #——————————————————————————————————————————————————————————————————————#
-        #Will have to rewrite this SART loop
+        #Will have to rewrite this SART loop, iterating over number of subsets, as before. 
         for j in range(ns): #Redfine what ns, parser argument. Number of subsets
             ind1 = range(j,numtheta,ns);
-            p = P[j] #What is big P, maybe an array? Projection data? 
+            p = P[j] #What is big P, maybe an array? Projection data? P[j] as a vector
             #Forward projection step
-            fp_id,fp = astra.create_sino(f,p) #Creating a sinogram, forward projection
+            fp_id,fp = astra.create_sino(f,p) #Creating a sinogram, forward projection. Using the image. Creating a sinogram using the image created with superiorization
             #Perform elementwise division
-            diffs = (sino[ind1,:] - fp*dx) / Minv[j] / dx #fp is forward project, normalizing data by dividing by the minimum value? Calculates the differences, elementwise division. Minv is the inverse matrix                  
+            diffs = (sino[ind1,:] - fp*dx) / Minv[j] / dx #fp is forward project, normalizing data by dividing by the minimum value? Calculates the difference between the sinogram and the forward projection, which is multiplied by the size of the pixels. Which is divided by the matrix, which is then divided by the size of the pixel             
             bp_id,bp = astra.create_backprojection(diffs,p) #Creating the backprojection
             #Get rid of spurious large values
             ind2 = np.abs(bp) > 1e3 #Set anything above a certain range, if its above 1000, it has a value of 0, Boolean, masking 
             bp[ind2] = 0
             #Update f
-            f = f + beta * bp / Dinv[j] #what is Dinv?, Dinv is an array. Dinv is the inverse of D matrix. Only index over j because they are diagonal matrix
+            f = f + beta * bp / Dinv[j] #what is Dinv?, Dinv is an array. Dinv is the inverse of D matrix. Only index over j because they are diagonal matrix. Beta is the relaxation parameter. bp represents the back projection 
             astra.data2d.delete(fp_id)
             astra.data2d.delete(bp_id)
             
