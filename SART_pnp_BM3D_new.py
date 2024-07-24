@@ -238,18 +238,18 @@ calc_error = False
 #Create projectors and normalization terms, corresponding to diagonal matrices M and D, for each subset of projection data
 
 P, Dinv, D_id, Minv, M_id = [None]*ns,[None]*ns,[None]*ns,[None]*ns,[None]*ns #Arrange as None type by the number of subsets arrays, rows which is the number of subsets
-for j in range(ns):
-    ind1 = range(j,numtheta,ns); #Filling these with data, taking steps of ns
-    p = create_projector(geom,numbin,angles[ind1],dso,dod,fan_angle) #separately defined
+for j in range(ns): #iterating over number of subsets 
+    ind1 = range(j,numtheta,ns); #Filling these with data, taking steps of ns. numtheta - 1 is the end of the range, 0 - numtheta-1. Where ns is the step size
+    p = create_projector(geom,numbin,angles[ind1],dso,dod,fan_angle) #separately defined, sequentially taking slices. 
     
-    D_id[j], Dinv[j] = \
+    D_id[j], Dinv[j] = \ #Sequence of arrays D_id(n) = backprojection of the subset matrix n. Submatrix of the whole projection
              astra.create_backprojection(np.ones((numtheta//ns,numbin)),p) #Creating an array of 1's. Number of theta/ns. The numbin is the detector pixels. Parsing projection data and the system matrix. Number of angles/number of subsets. Initialize system matrix to be right dimension of all ones. Put in that matrix and projector geometry and updates. This funciton creates system matrix. Creating backprojection.   
-    M_id[j], Minv[j] = \ #D_id are taking in the jth column and the \ move on to the next line
+    M_id[j], Minv[j] = \ #M_id are taking in the jth column and the \ move on to the next line. M_id is a matrix of numpix by numpix. 
              astra.create_sino(np.ones((numpix,numpix)),p) 
     #Avoid division by zero, also scale M to pixel size
-    Dinv[j] = np.maximum(Dinv[j],eps)
+    Dinv[j] = np.maximum(Dinv[j],eps) #What is the use of this line and the following line of code? They have to be bigger than machine epislon, thus you are never dividing by numbers smaller than machine epsilon. 
     Minv[j] = np.maximum(Minv[j],eps) #Whichever is greater
-    P[j] = p
+    P[j] = p #jth projection matrix
 
 #Open the file for storing residuals
 res_file = open(outfolder + "/residuals.txt", "w+")
@@ -279,7 +279,7 @@ for n in range(len(fnames)):
 
     #Get new psize if they're being read from a file
     try:
-        dx = psizes[n]
+        dx = psizes[n] #is the pixel size
     #Otherwise, psize is a float
     except:
         dx = psizes
@@ -293,25 +293,25 @@ for n in range(len(fnames)):
     #—————————————————————————#
     # Single-image processing #
     #—————————————————————————#
-    for k in range(1, numits + 1):
+    for k in range(1, numits + 1): #Because you are not starting with 0. 
         #Skip it, if it's built already & we aren't overwriting old ones
         if (not overwrite) and exists(name):
             break
         #——————————————————————————————————————————————————————————————————————#
         # Superiorization step                                                 #
         #——————————————————————————————————————————————————————————————————————#
-        if (use_sup) and (k >= kmin) and ((k-kmin)%kstep == 0): #% is mod in python 
+        if (use_sup) and (k >= kmin) and ((k-kmin)%kstep == 0): #% is mod in python If you are superirizing the image, then k greater than or equal to the k minimum. kstep represents the number of time before next SART iteration
             print("Superiorizing before the next SART iteration...")
             #Apply BM3D
             f_out = bm3d(f,sigma) #the image out is equal to the model 
-            #Calc pnorm
-            p = f_out - f #The difference between the image
-            pnorm = np.linalg.norm(p,'fro') + eps #The norm of the differences 
+            #Calc pnorm, what the model does between the images. What the model does to the image. 
+            p = f_out - f #The difference between the image, p is an array. 
+            pnorm = np.linalg.norm(p,'fro') + eps #The norm of the differences. How bad. Where you add machine eps
             print("pnorm: " + str(pnorm)) #pnorm and the string of pnorm
             #Update alpha
-            if k == kmin: #Bottom of the range
+            if k == kmin: #Bottom of the range, first step 
                 #Begin with full magnitude of initial transform
-                alpha = pnorm #Taking the magnitude of the vector. High norm = higher superiorization step
+                alpha = pnorm #Taking the magnitude of the vector. High norm = higher superiorization step, represents how bad. Each iteration, alpha = pnorm is only for p1
             else:
                 #Attenuate for each subsequent superiorization
                 alpha *= gamma #Multiplying by a decaying factor, starts at 1
