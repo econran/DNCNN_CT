@@ -335,15 +335,15 @@ for n in range(len(fnames)):
             ind1 = range(j,numtheta,ns);
             p = P[j] #What is big P, maybe an array? Projection data? 
             #Forward projection step
-            fp_id,fp = astra.create_sino(f,p) 
+            fp_id,fp = astra.create_sino(f,p) #Creating a sinogram, forward projection
             #Perform elementwise division
-            diffs = (sino[ind1,:] - fp*dx) / Minv[j] / dx                  
-            bp_id,bp = astra.create_backprojection(diffs,p)
+            diffs = (sino[ind1,:] - fp*dx) / Minv[j] / dx #fp is forward project, normalizing data by dividing by the minimum value? Calculates the differences, elementwise division                 
+            bp_id,bp = astra.create_backprojection(diffs,p) #Creating the backprojection
             #Get rid of spurious large values
-            ind2 = np.abs(bp) > 1e3
+            ind2 = np.abs(bp) > 1e3 #Set anything above a certain range, if its above 1000, it has a value of 0, Boolean, masking 
             bp[ind2] = 0
             #Update f
-            f = f + beta * bp / Dinv[j]
+            f = f + beta * bp / Dinv[j] #what is Dinv?, Dinv is an array
             astra.data2d.delete(fp_id)
             astra.data2d.delete(bp_id)
             
