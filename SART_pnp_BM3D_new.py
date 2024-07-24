@@ -330,11 +330,12 @@ for n in range(len(fnames)):
         #——————————————————————————————————————————————————————————————————————#
         # SART loop                                                            #
         #——————————————————————————————————————————————————————————————————————#
-        for j in range(ns):
+        #Will have to rewrite this SART loop
+        for j in range(ns): #Redfine what ns, parser argument. Number of subsets
             ind1 = range(j,numtheta,ns);
-            p = P[j]
+            p = P[j] #What is big P, maybe an array? Projection data? 
             #Forward projection step
-            fp_id,fp = astra.create_sino(f,p)
+            fp_id,fp = astra.create_sino(f,p) 
             #Perform elementwise division
             diffs = (sino[ind1,:] - fp*dx) / Minv[j] / dx                  
             bp_id,bp = astra.create_backprojection(diffs,p)
