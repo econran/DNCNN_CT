@@ -15,7 +15,7 @@
 #——————————————————————————————————————————————————————————————————————————————#
 # Import                                                                       #
 #——————————————————————————————————————————————————————————————————————————————#
-
+#importing the libraries
 import argparse
 from glob import glob
 import os
@@ -29,7 +29,8 @@ from bm3d import bm3d
 #——————————————————————————————————————————————————————————————————————————————#
 
 # This function creates projectors, preprocessing our data before
-# passing it to astra for the heavy lifting
+# passing it to astra for the heavy lifting, accurate, letting astra
+#Minor modifications, at most
 def create_projector(geom, numbin, angles, dso, dod, fan_angle):
     if geom == 'parallel':
         proj_geom = astra.create_proj_geom(geom, 1.0, numbin, angles)
@@ -44,7 +45,7 @@ def create_projector(geom, numbin, angles, dso, dod, fan_angle):
         proj_geom = astra.create_proj_geom\
                     (geom, det_width, numbin, angles, dso, dod)
 
-    p = astra.create_projector('cuda',proj_geom,vol_geom);
+    p = astra.create_projector('cuda',proj_geom,vol_geom); #make new variable, that is not p because p is used elsewhere
     return p
 
 # This function builds and initializes the argument parser,
@@ -52,37 +53,37 @@ def create_projector(geom, numbin, angles, dso, dod, fan_angle):
 # the command line
 def generateParsedArgs():
     #Initialize parser
-    parser = argparse.ArgumentParser(description='')
+    parser = argparse.ArgumentParser(description='') #Add the argument
 
-    parser.add_argument('--sino', dest='infile', default='.', \
+    parser.add_argument('--sino', dest='infile', default='.', \ #Add the sinogram, sinos folder
         help='input sinogram -- directory or single file')
 
-    parser.add_argument('--out', dest='outfolder', default='.', \
+    parser.add_argument('--out', dest='outfolder', default='.', \ #Outputs folder
         help='output directory')
 
-    parser.add_argument('--numpix', dest='numpix', type=int, default=512, \
+    parser.add_argument('--numpix', dest='numpix', type=int, default=512, \ #Default the number of pixels to 512
         help='size of volume (n x n )')
 
-    parser.add_argument('--psize', dest='psize', default='', \
+    parser.add_argument('--psize', dest='psize', default='', \ #Defining pixel size  
         help='pixel size (float) OR file containing pixel sizes (string)');
 
-    parser.add_argument('--numbin', dest='numbin', type=int, default=729, \
+    parser.add_argument('--numbin', dest='numbin', type=int, default=729, \ #Number of detector pixels, number of columns in system matrix
         help='number of detector pixels')
 
     parser.add_argument('--ntheta', dest='numtheta', type=int, default=900, \
         help='number of angles')
 
-    parser.add_argument('--nsubs', dest='ns', type=int, default=1, \
+    parser.add_argument('--nsubs', dest='ns', type=int, default=1, \ # number of subsets, cannot have decimal array
         help='number of subsets. must divide evenly into number of angles')
 
-    parser.add_argument('--range', dest='theta_range', type=float, nargs=2, \
+    parser.add_argument('--range', dest='theta_range', type=float, nargs=2, \ #Angle range
                         default=[0, 360], \
         help='starting and ending angles (deg)')
 
-    parser.add_argument('--geom', dest='geom', default='fanflat', \
+    parser.add_argument('--geom', dest='geom', default='fanflat', \ #not necessarily worrying about rn. 
         help='geometry (parallel or fanflat)')
 
-    parser.add_argument('--dso', dest='dso', type=float, default=100, \
+    parser.add_argument('--dso', dest='dso', type=float, default=100, \ #projection geometry
         help='source-object distance (cm) (fanbeam only)')
 
     parser.add_argument('--dod', dest='dod', type=float, default=100, \
@@ -91,31 +92,31 @@ def generateParsedArgs():
     parser.add_argument('--fan_angle', dest='fan_angle', default=35, type=float, \
         help='fan angle (deg) (fanbeam only)')
 
-    parser.add_argument('--numits', dest='num_its', default=32, type=int, \
+    parser.add_argument('--numits', dest='num_its', default=32, type=int, \ #For the superiorization, default is 32
         help='maximum number of iterations')
 
-    parser.add_argument('--beta', dest='beta', default=1., type=float, \
+    parser.add_argument('--beta', dest='beta', default=1., type=float, \ #Relaxation parameter
         help='relaxation parameter beta')
 
-    parser.add_argument('--x0', dest='x0_file',default='', \
+    parser.add_argument('--x0', dest='x0_file',default='', \ #initial image, default to 0 
         help='initial image (default: zeros)')
 
-    parser.add_argument('--xtrue', dest='xtrue_file', default='', \
+    parser.add_argument('--xtrue', dest='xtrue_file', default='', \ #The true image, trying to get to 
         help='true image (if available)')
 
-    parser.add_argument('--sup_params', dest='sup_params', type=float, nargs=4,\
+    parser.add_argument('--sup_params', dest='sup_params', type=float, nargs=4,\ #kmin, kstep, gamma, and bm3D is not important to our code. 
         help='superiorization parameters: k_min, k_step, gamma, bm3d_sigma')
 
-    parser.add_argument('--epsilon_target', dest='epsilon_target', default=0., \
+    parser.add_argument('--epsilon_target', dest='epsilon_target', default=0., \ #episilon target is just 0
         help='target residual value (float, or file with residual values)')
 
-    parser.add_argument('--ckpt_dir', dest='ckpt_dir', default='./checkpoint', \
+    parser.add_argument('--ckpt_dir', dest='ckpt_dir', default='./checkpoint', \ #Unsure what this is.
         help='directory containing checkpoint for DnCnn')
 
     parser.add_argument('--make_png', dest='make_png',type=bool, default=False,\
         help='whether or not you would like to generate .png files')
 
-    parser.add_argument('--make_intermediate', dest='make_intermediate', \
+    parser.add_argument('--make_intermediate', dest='make_intermediate', \ #Make steps along the way to show how well things are going 
                         type=bool, default=False,\
         help='whether or not you would like to generate output files each iter')
 
@@ -127,7 +128,7 @@ def generateParsedArgs():
     return parser.parse_args()
 
 
-# This function outputs a .png
+# This function outputs a .png, we have stuff to make both .flt and .png
 def makePNG(f, outname):
     #Set any negative values to positive machine epsilon
     img = np.maximum(f,np.finfo(float).eps)
@@ -185,24 +186,24 @@ make_intermediate = bool(args.make_intermediate)  #whether or not you would
                                             #like to generate output each iter
 
 #Were superiorization parameters provided?
-use_sup = False
+use_sup = False #Boolean equal to false 
 kmin = 0    #Iteration at which superiorization begins
 kstep = 0   #Interval of SARTS between each superiorization step
 gamma = 0   #Geometric attenuation factor for superiorization
 sigma = 0   #The parameter for BM3D
 alpha = 1   #Computed attenuation factor for superiorization, not an arg
-if not (args.sup_params is None):
-    use_sup = True
+if not (args.sup_params is None): #if it is false, then you do not use superiorization 
+    use_sup = True #if you are using superiorization. 
     kmin = int(args.sup_params[0])
     kstep = int(args.sup_params[1])
     gamma = args.sup_params[2]
     sigma = args.sup_params[3]
 
 #Get machine epsilon for the float type we are using
-eps = np.finfo(float).eps
+eps = np.finfo(float).eps #how accurate you can get with the float type. How small you can get epsilon value. 
 
 #Generate list of filenames from directory provided
-fnames = []
+fnames = [] #Create the file array
 if os.path.isdir(infile):
     fnames = sorted(glob(infile + '/*.flt'))
 #Otherwise, a single filename was provided
@@ -210,7 +211,7 @@ else:
     fnames.append(infile)
 
 #If pixel size was provided as a floating point value
-psizes = 0
+psizes = 0 #pixel size is irrelevant in flt
 try:
     psizes = float(psize)
 #Otherwise, a filename was given
@@ -219,7 +220,7 @@ except ValueError:
 
 #If target residual was provided as a single value
 try:
-    epsilon_target = float(epsilon_target)
+    epsilon_target = float(epsilon_target) 
 #Otherwise, a file was provided
 except ValueError:
     epsilon_target = np.loadtxt(epsilon_target,dtype='f')
@@ -228,15 +229,15 @@ except ValueError:
 vol_geom = astra.create_vol_geom(numpix, numpix)
 
 #Generate array of angular positions
-theta_range = np.deg2rad(theta_range) #convert to radians
-angles = theta_range[0] + np.linspace(0,numtheta-1,numtheta,False) \
-         *(theta_range[1]-theta_range[0])/numtheta
+theta_range = np.deg2rad(theta_range) #convert to radians #0 to 360 becomes 0 to 2pi
+angles = theta_range[0] + np.linspace(0,numtheta-1,numtheta,False) \ #how far apart the angles are, where you go by steps of theta. used to create an array of evenly spaced values over a specified range.
+         *(theta_range[1]-theta_range[0])/numtheta 
 
 calc_error = False
     
-#Create projectors and normalization terms, corresponding to
-#diagonal matrices M and D, for each subset of projection data
-P, Dinv, D_id, Minv, M_id = [None]*ns,[None]*ns,[None]*ns,[None]*ns,[None]*ns #Arrange as None type arrays
+#Create projectors and normalization terms, corresponding to diagonal matrices M and D, for each subset of projection data
+
+P, Dinv, D_id, Minv, M_id = [None]*ns,[None]*ns,[None]*ns,[None]*ns,[None]*ns #Arrange as None type by the number of subsets arrays, rows which is the number of subsets
 for j in range(ns):
     ind1 = range(j,numtheta,ns); #Filling these with data, taking steps of ns
     p = create_projector(geom,numbin,angles[ind1],dso,dod,fan_angle) #separately defined
