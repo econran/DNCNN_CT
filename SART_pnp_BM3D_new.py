@@ -236,7 +236,7 @@ angles = theta_range[0] + np.linspace(0,numtheta-1,numtheta,False) \ #how far ap
 calc_error = False
     
 #Create projectors and normalization terms, corresponding to diagonal matrices M and D, for each subset of projection data
-
+#Forming the matrices M and D, because they are inverses of the matrices. Multiplying the diagonal matrix by a vertex
 P, Dinv, D_id, Minv, M_id = [None]*ns,[None]*ns,[None]*ns,[None]*ns,[None]*ns #Arrange as None type by the number of subsets arrays, rows which is the number of subsets
 for j in range(ns): #iterating over number of subsets 
     ind1 = range(j,numtheta,ns); #Filling these with data, taking steps of ns. numtheta - 1 is the end of the range, 0 - numtheta-1. Where ns is the step size
@@ -245,7 +245,7 @@ for j in range(ns): #iterating over number of subsets
     D_id[j], Dinv[j] = \ #Sequence of arrays D_id(n) = backprojection of the subset matrix n. Submatrix of the whole projection
              astra.create_backprojection(np.ones((numtheta//ns,numbin)),p) #Creating an array of 1's. Number of theta/ns. The numbin is the detector pixels. Parsing projection data and the system matrix. Number of angles/number of subsets. Initialize system matrix to be right dimension of all ones. Put in that matrix and projector geometry and updates. This funciton creates system matrix. Creating backprojection.   
     M_id[j], Minv[j] = \ #M_id are taking in the jth column and the \ move on to the next line. M_id is a matrix of numpix by numpix. 
-             astra.create_sino(np.ones((numpix,numpix)),p) 
+             astra.create_sino(np.ones((numpix,numpix)),p)  #Retracing, mutiplying, difference sinogram. 
     #Avoid division by zero, also scale M to pixel size
     Dinv[j] = np.maximum(Dinv[j],eps) #What is the use of this line and the following line of code? They have to be bigger than machine epislon, thus you are never dividing by numbers smaller than machine epsilon. 
     Minv[j] = np.maximum(Minv[j],eps) #Whichever is greater
