@@ -242,8 +242,8 @@ for j in range(ns):
     p = create_projector(geom,numbin,angles[ind1],dso,dod,fan_angle) #separately defined
     
     D_id[j], Dinv[j] = \
-             astra.create_backprojection(np.ones((numtheta//ns,numbin)),p) #Creating an array of 1's. Number of theta/ns. The numbin is the detector pixels. 
-    M_id[j], Minv[j] = \
+             astra.create_backprojection(np.ones((numtheta//ns,numbin)),p) #Creating an array of 1's. Number of theta/ns. The numbin is the detector pixels. Parsing projection data and the system matrix. Number of angles/number of subsets. Initialize system matrix to be right dimension of all ones. Put in that matrix and projector geometry and updates. This funciton creates system matrix. Creating backprojection.   
+    M_id[j], Minv[j] = \ #D_id are taking in the jth column and the \ move on to the next line
              astra.create_sino(np.ones((numpix,numpix)),p) 
     #Avoid division by zero, also scale M to pixel size
     Dinv[j] = np.maximum(Dinv[j],eps)
