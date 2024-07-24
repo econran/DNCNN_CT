@@ -236,18 +236,18 @@ calc_error = False
     
 #Create projectors and normalization terms, corresponding to
 #diagonal matrices M and D, for each subset of projection data
-P, Dinv, D_id, Minv, M_id = [None]*ns,[None]*ns,[None]*ns,[None]*ns,[None]*ns
+P, Dinv, D_id, Minv, M_id = [None]*ns,[None]*ns,[None]*ns,[None]*ns,[None]*ns #Arrange as None type arrays
 for j in range(ns):
-    ind1 = range(j,numtheta,ns);
-    p = create_projector(geom,numbin,angles[ind1],dso,dod,fan_angle)
+    ind1 = range(j,numtheta,ns); #Filling these with data, taking steps of ns
+    p = create_projector(geom,numbin,angles[ind1],dso,dod,fan_angle) #separately defined
     
     D_id[j], Dinv[j] = \
-             astra.create_backprojection(np.ones((numtheta//ns,numbin)),p)
+             astra.create_backprojection(np.ones((numtheta//ns,numbin)),p) #Creating an array of 1's. Number of theta/ns. The numbin is the detector pixels. 
     M_id[j], Minv[j] = \
-             astra.create_sino(np.ones((numpix,numpix)),p)
+             astra.create_sino(np.ones((numpix,numpix)),p) 
     #Avoid division by zero, also scale M to pixel size
     Dinv[j] = np.maximum(Dinv[j],eps)
-    Minv[j] = np.maximum(Minv[j],eps)
+    Minv[j] = np.maximum(Minv[j],eps) #Whichever is greater
     P[j] = p
 
 #Open the file for storing residuals
@@ -337,13 +337,13 @@ for n in range(len(fnames)):
             #Forward projection step
             fp_id,fp = astra.create_sino(f,p) #Creating a sinogram, forward projection
             #Perform elementwise division
-            diffs = (sino[ind1,:] - fp*dx) / Minv[j] / dx #fp is forward project, normalizing data by dividing by the minimum value? Calculates the differences, elementwise division                 
+            diffs = (sino[ind1,:] - fp*dx) / Minv[j] / dx #fp is forward project, normalizing data by dividing by the minimum value? Calculates the differences, elementwise division. Minv is the inverse matrix                  
             bp_id,bp = astra.create_backprojection(diffs,p) #Creating the backprojection
             #Get rid of spurious large values
             ind2 = np.abs(bp) > 1e3 #Set anything above a certain range, if its above 1000, it has a value of 0, Boolean, masking 
             bp[ind2] = 0
             #Update f
-            f = f + beta * bp / Dinv[j] #what is Dinv?, Dinv is an array
+            f = f + beta * bp / Dinv[j] #what is Dinv?, Dinv is an array. Dinv is the inverse of D matrix. Only index over j because they are diagonal matrix
             astra.data2d.delete(fp_id)
             astra.data2d.delete(bp_id)
             
@@ -351,7 +351,7 @@ for n in range(len(fnames)):
         # Cleanup                                                              #
         #——————————————————————————————————————————————————————————————————————#
         #Image output
-        if make_intermediate:
+        if make_intermediat
             makeFLT(f, outname + str(k) + '_SART')
             if make_png:
                 makePNG(f, outname + str(k) + '_SART')
