@@ -299,28 +299,28 @@ for n in range(len(fnames)):
         #——————————————————————————————————————————————————————————————————————#
         # Superiorization step                                                 #
         #——————————————————————————————————————————————————————————————————————#
-        if (use_sup) and (k >= kmin) and ((k-kmin)%kstep == 0):
+        if (use_sup) and (k >= kmin) and ((k-kmin)%kstep == 0): #% is mod in python 
             print("Superiorizing before the next SART iteration...")
             #Apply BM3D
-            f_out = bm3d(f,sigma)
+            f_out = bm3d(f,sigma) #the image out is equal to the model 
             #Calc pnorm
-            p = f_out - f
-            pnorm = np.linalg.norm(p,'fro') + eps
-            print("pnorm: " + str(pnorm))
+            p = f_out - f #The difference between the image
+            pnorm = np.linalg.norm(p,'fro') + eps #The norm of the differences 
+            print("pnorm: " + str(pnorm)) #pnorm and the string of pnorm
             #Update alpha
-            if k == kmin:
+            if k == kmin: #Bottom of the range
                 #Begin with full magnitude of initial transform
-                alpha = pnorm
+                alpha = pnorm #Taking the magnitude of the vector. High norm = higher superiorization step
             else:
                 #Attenuate for each subsequent superiorization
-                alpha *= gamma
+                alpha *= gamma #Multiplying by a decaying factor, starts at 1
             print("alpha: " + str(alpha) + '\n')
             #Apply alpha if necessary
-            if pnorm > alpha:
+            if pnorm > alpha: #If norm of the two images, how far apart they are is greater than Computed attenuation factor for superiorization, not an arg
                 p = alpha * p / (np.linalg.norm(p,'fro') + eps) #Denominator probably doesn't need to be recalculated here, as it's stored in 'pnorm'. Not changing it now, as I'd prefer not to break it by accident.
-                f = f + p
+                f = f + p #Add that difference to the function
             else:
-                f = f_out
+                f = f_out #otherwise just the output
             #Image output
             if make_intermediate:
                 makeFLT(f, outname + str(k) + '_bm3d_sup')
