@@ -302,7 +302,7 @@ for n in range(len(fnames)):
         #——————————————————————————————————————————————————————————————————————#
         # Superiorization step                                                 #
         #——————————————————————————————————————————————————————————————————————#
-        if (use_sup) and (k >= kmin) and ((k-kmin)%kstep == 0): #% is mod in python If you are superirizing the image, then k greater than or equal to the k minimum. kstep represents the number of time before next SART iteration
+        if (use_sup) and (k >= kmin) and ((k-kmin)%kstep == 0): #% is mod in python If you are superiorizing the image, then k greater than or equal to the k minimum. kstep represents the number of time before next SART iteration
             print("Superiorizing before the next SART iteration...")
             #Apply BM3D
             f_out = bm3d(f,sigma) #the image out is equal to the model 
