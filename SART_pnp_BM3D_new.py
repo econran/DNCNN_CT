@@ -239,14 +239,16 @@ calc_error = False
 #Forming the matrices M and D, because they are inverses of the matrices. Multiplying the diagonal matrix by a vertex
 P, Dinv, D_id, Minv, M_id = [None]*ns,[None]*ns,[None]*ns,[None]*ns,[None]*ns #Arrange as None type by the number of subsets arrays, rows which is the number of subsets
 for j in range(ns): #iterating over number of subsets 
+    #creating list of angles by picking out a subset of angles
     ind1 = range(j,numtheta,ns); #Filling these with data, taking steps of ns. numtheta - 1 is the end of the range, 0 - numtheta-1. Where ns is the step size
+    #p works as an operator
     p = create_projector(geom,numbin,angles[ind1],dso,dod,fan_angle) #separately defined, sequentially taking slices. 
     
     D_id[j], Dinv[j] = \ #Sequence of arrays D_id(n) = backprojection of the subset matrix n. Submatrix of the whole projection
              astra.create_backprojection(np.ones((numtheta//ns,numbin)),p) #Creating an array of 1's. Number of theta/ns. The numbin is the detector pixels. Parsing projection data and the system matrix. Number of angles/number of subsets. Initialize system matrix to be right dimension of all ones. Put in that matrix and projector geometry and updates. This funciton creates system matrix. Creating backprojection.   
     M_id[j], Minv[j] = \ #M_id are taking in the jth column and the \ move on to the next line. M_id is a matrix of numpix by numpix. 
              astra.create_sino(np.ones((numpix,numpix)),p)  #Retracing, mutiplying, difference sinogram. 
-    #Avoid division by zero, also scale M to pixel size
+    #Avoid division by zero, also scale M to pixel size 
     Dinv[j] = np.maximum(Dinv[j],eps) #What is the use of this line and the following line of code? They have to be bigger than machine epislon, thus you are never dividing by numbers smaller than machine epsilon. 
     Minv[j] = np.maximum(Minv[j],eps) #Whichever is greater
     P[j] = p #jth projection matrix
@@ -331,7 +333,8 @@ for n in range(len(fnames)):
         #——————————————————————————————————————————————————————————————————————#
         # SART loop                                                            #
         #——————————————————————————————————————————————————————————————————————#
-        #Will have to rewrite this SART loop, iterating over number of subsets, as before. 
+        #Change any bm3d to model.predict. Loading the model and choosing which one.
+        #Will have to rewrite this SART loop, iterating over number of subsets, as before. Iterates over subsets 
         for j in range(ns): #Redfine what ns, parser argument. Number of subsets
             ind1 = range(j,numtheta,ns);
             p = P[j] #What is big P, maybe an array? Projection data? P[j] as a vector
@@ -341,7 +344,7 @@ for n in range(len(fnames)):
             diffs = (sino[ind1,:] - fp*dx) / Minv[j] / dx #fp is forward project, normalizing data by dividing by the minimum value? Calculates the difference between the sinogram and the forward projection, which is multiplied by the size of the pixels. Which is divided by the matrix, which is then divided by the size of the pixel             
             bp_id,bp = astra.create_backprojection(diffs,p) #Creating the backprojection
             #Get rid of spurious large values
-            ind2 = np.abs(bp) > 1e3 #Set anything above a certain range, if its above 1000, it has a value of 0, Boolean, masking 
+            ind2 = np.abs(bp) > 1e3 #Set anything above a certain range, if its above 1000, it has a value of 0, Boolean, masking. Because of the mismatch, you have huge values, so this and following line just kills those larger values. 
             bp[ind2] = 0
             #Update f
             f = f + beta * bp / Dinv[j] #what is Dinv?, Dinv is an array. Dinv is the inverse of D matrix. Only index over j because they are diagonal matrix. Beta is the relaxation parameter. bp represents the back projection 
